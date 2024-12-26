@@ -87,7 +87,7 @@ async function run() {
     app.get("/cars/:available", async (req, res) => {
       const { search = "", sortDate, sortPrice } = req.query;
       let options = {};
-      const available = req.params.available;
+      const available = req.params.available;;
 
       if (sortDate) options.date = sortDate === "asc" ? 1 : -1;
       if (sortPrice) options.rental_price = sortPrice === "asc" ? 1 : -1;
@@ -96,6 +96,7 @@ async function run() {
           $regex: search,
           $options: "i",
         },
+
       };
       if (available !== undefined) query.availability = available;
       
@@ -164,6 +165,16 @@ async function run() {
       const result = await bookMarkCollection.updateOne(query, updateData);
       res.send(result);
     });
+    app.patch("/bookmarkstatusupdate/:id", verifyToken, async (req, res) => {
+      const id = req.params.id;
+      const booking_status = req.body;
+      const query = { _id: new ObjectId(id) };
+      const updateData = {
+        $set: booking_status,
+      };
+      const result = await bookMarkCollection.updateOne(query, updateData);
+      res.send(result);
+    });
     app.delete("/bookmark/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -187,3 +198,4 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
+
