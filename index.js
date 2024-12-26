@@ -8,7 +8,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cookieParser = require('cookie-parser')
 
 const corsOptions = {
-  origin: ['http://localhost:5173'],
+  origin: ['http://localhost:5173', 'https://alta-car-rentals.web.app', 'https://alta-car-rentals.firebaseapp.com'],
   credentials: true,
   optionalSuccessStatus: 200,
 }
@@ -84,9 +84,10 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/cars", async (req, res) => {
+    app.get("/cars/:available", async (req, res) => {
       const { search = "", sortDate, sortPrice } = req.query;
       let options = {};
+      const available = req.params.available;
 
       if (sortDate) options.date = sortDate === "asc" ? 1 : -1;
       if (sortPrice) options.rental_price = sortPrice === "asc" ? 1 : -1;
@@ -96,6 +97,8 @@ async function run() {
           $options: "i",
         },
       };
+      if (available !== undefined) query.availability = available;
+      
       const result = await carCollection.find(query).sort(options).toArray();
       res.send(result);
     });
@@ -167,10 +170,10 @@ async function run() {
       const result = await bookMarkCollection.deleteOne(query);
       res.send(result);
     });
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    // await client.db("admin").command({ ping: 1 });
+    // console.log(
+    //   "Pinged your deployment. You successfully connected to MongoDB!"
+    // );
   } finally {
     // await client.close();
   }
